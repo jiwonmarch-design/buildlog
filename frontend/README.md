@@ -23,5 +23,6 @@ VITE_API_BASE_URL=http://localhost:8000
 
 ```powershell
 npm.cmd run lint
+npm.cmd run test
 npm.cmd run build
 ```
