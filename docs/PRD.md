@@ -306,14 +306,17 @@ BuildLog는 다음과 같이 이 불편을 줄입니다.
 | --- | --- | --- |
 | 화면 | React, TypeScript, HTML, CSS | 화면을 기능별 컴포넌트로 나누고 FastAPI와 API로 연결하기 좋음 |
 | 서버 | Python, FastAPI | 입력 검사와 API 문서를 제공하며 React 화면과 분리해 개발하기 좋음 |
-| 실제 서비스 데이터베이스 | Supabase의 PostgreSQL | 여러 컴퓨터에서 같은 데이터를 안전하게 저장하고 조회할 수 있음 |
-| 자동 테스트 데이터베이스 | SQLite3 | 별도 서버 없이 빠르고 독립적으로 테스트를 반복하기 좋음 |
+| 현재 개발 데이터베이스 | SQLite3 파일 DB | Supabase 학습 전까지 로컬에서 데이터를 저장하기 쉬움 |
+| 자동 테스트 데이터베이스 | SQLite3 임시 DB | 별도 서버 없이 빠르고 독립적으로 테스트를 반복하기 좋음 |
+| 향후 서비스 데이터베이스 | Supabase의 PostgreSQL | 여러 컴퓨터에서 같은 데이터를 안전하게 저장하고 조회할 수 있음 |
 
 정확한 버전은 개발을 시작할 때 서로 호환되는 안정 버전으로 정합니다.
 
 FastAPI에서는 SQLAlchemy를 사용해 Supabase PostgreSQL과 SQLite3가 같은 데이터 구조를 사용하게 합니다. 데이터 구조 변경은 Alembic으로 관리합니다. SQLite3는 자동 테스트에만 사용하며, 실제 서비스 데이터는 Supabase에 저장합니다.
 
 Supabase는 첫 버전에서 데이터베이스 용도로 사용합니다. 회원가입과 로그인 규칙은 이 문서에 정한 대로 FastAPI에서 처리합니다.
+
+Supabase 수업을 진행하기 전까지는 로컬 SQLite3를 개발 실행 데이터베이스로도 사용합니다. Supabase 연결은 관련 학습을 마친 뒤 별도 Phase에서 진행합니다.
 
 ## 11. 아직 정하지 않은 내용
 

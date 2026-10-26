@@ -246,7 +246,9 @@ FastAPI 요청 경로의 정확한 문자열은 Phase 1~3에서 정하지만 기
 | --- | --- | --- |
 | `DATABASE_URL` | Supabase PostgreSQL 연결 | 비밀 |
 | `TEST_DATABASE_URL` | SQLite3 테스트 연결 | 비밀 아님 |
-| `AUTH_SECRET_KEY` | 로그인 정보 보호 | 비밀 |
+| `SESSION_COOKIE_NAME` | 로그인 세션 쿠키 이름 | 비밀 아님 |
+| `SESSION_LIFETIME_DAYS` | 로그인 유지 기간 | 비밀 아님 |
+| `COOKIE_SECURE` | HTTPS 전용 쿠키 여부 | 비밀 아님 |
 | `FRONTEND_ORIGIN` | 허용할 React 주소 | 비밀 아님 |
 | `ENVIRONMENT` | 개발·테스트·운영 구분 | 비밀 아님 |
 

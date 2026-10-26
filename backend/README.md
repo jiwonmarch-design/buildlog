@@ -12,6 +12,7 @@ py -m venv .venv
 ## 실행
 
 ```powershell
+.\.venv\Scripts\python.exe -m alembic upgrade head
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
@@ -26,3 +27,5 @@ py -m venv .venv
 ```
 
 실제 환경 변수는 `.env.example`을 참고해 `.env`에 저장합니다.
+
+현재 개발 데이터는 `../database/buildlog.sqlite3`에 저장됩니다. 이 파일은 Git에서 제외됩니다.

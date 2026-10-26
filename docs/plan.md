@@ -14,12 +14,13 @@
 | 백엔드 | Python, FastAPI | 회원, 권한, 기록과 커뮤니티 API |
 | 데이터 접근 | SQLAlchemy | Supabase PostgreSQL과 SQLite3를 같은 코드로 사용 |
 | 데이터 구조 변경 | Alembic | 테이블 변경 내역 생성과 적용 |
-| 실제 서비스 데이터베이스 | Supabase PostgreSQL | 개발 연동과 실제 서비스 데이터 저장 |
-| 자동 테스트 데이터베이스 | SQLite3 | 빠르고 독립적인 테스트 실행 |
+| 현재 개발 데이터베이스 | SQLite3 파일 DB | Supabase 학습 전까지 로컬 실행 데이터 저장 |
+| 자동 테스트 데이터베이스 | SQLite3 임시 DB | 빠르고 독립적인 테스트 실행 |
+| 향후 서비스 데이터베이스 | Supabase PostgreSQL | 관련 학습 후 연결하고 실제 서비스 데이터 저장 |
 
 Supabase는 첫 버전에서 데이터베이스로 사용합니다. Supabase Auth를 사용하지 않으며, 회원가입과 로그인은 `spec.md`의 규칙대로 FastAPI에서 처리합니다.
 
-SQLite3는 자동 테스트용입니다. 각 테스트는 다른 테스트의 데이터에 영향을 받지 않게 별도의 임시 데이터베이스에서 실행합니다. 실제 서비스 데이터는 Supabase PostgreSQL에 저장합니다.
+현재 개발 실행과 자동 테스트는 SQLite3를 사용합니다. 개발 실행 데이터는 `database/buildlog.sqlite3`에 저장하고, 각 테스트는 다른 테스트의 데이터에 영향을 받지 않는 임시 DB를 사용합니다. Supabase PostgreSQL 연결은 관련 수업을 진행한 뒤 Phase 13에서 진행합니다.
 
 ## 3. 개발 원칙
 
@@ -27,7 +28,7 @@ SQLite3는 자동 테스트용입니다. 각 테스트는 다른 테스트의 �
 - 프런트엔드와 백엔드는 HTTP API로 통신합니다.
 - 화면 검사는 React와 FastAPI 양쪽에서 수행하되, 최종 권한 판단은 반드시 FastAPI가 합니다.
 - 데이터 조회·수정·삭제 때마다 현재 로그인한 사용자의 권한을 확인합니다.
-- 비밀번호 원문, Supabase 접속 정보와 로그인 비밀값은 코드에 적지 않습니다.
+- 비밀번호 원문과 Supabase 접속 정보는 코드에 적지 않습니다.
 - 실제 비밀값은 `.env`에 두고, 필요한 설정 이름만 `.env.example`에 기록합니다.
 - 데이터 구조는 Supabase PostgreSQL과 SQLite3에서 모두 동작하게 작성합니다.
 - 각 Phase에서 정상 상황, 잘못된 입력, 실패 상황과 권한을 함께 테스트합니다.
@@ -74,9 +75,11 @@ buildlog/
 
 ### 백엔드
 
-- `DATABASE_URL`: Supabase PostgreSQL 연결 주소
+- `DATABASE_URL`: 현재 로컬 SQLite3 연결 주소. Phase 13에서 Supabase 주소로 교체
 - `TEST_DATABASE_URL`: SQLite3 테스트 주소. 기본값은 테스트 전용 임시 DB
-- `AUTH_SECRET_KEY`: 로그인 정보를 안전하게 확인하기 위한 비밀값
+- `SESSION_COOKIE_NAME`: 로그인 세션 쿠키 이름
+- `SESSION_LIFETIME_DAYS`: 로그인 유지 기간
+- `COOKIE_SECURE`: HTTPS에서만 쿠키를 보낼지 여부
 - `FRONTEND_ORIGIN`: React 화면 주소
 - `ENVIRONMENT`: 개발, 테스트 또는 운영 환경 구분
 
@@ -103,7 +106,7 @@ buildlog/
 | 10 | 좋아요 | 좋아요 등록·취소와 중복 방지 완성 |
 | 11 | 신고와 운영자 확인 | 신고 저장과 운영자 전용 확인 완성 |
 | 12 | 반응형 화면과 공통 실패 처리 | 컴퓨터·휴대폰 화면과 오류 안내 완성 |
-| 13 | Supabase 연결과 전체 통합 확인 | 실제 DB 연결과 전체 테스트 완료 |
+| 13 | Supabase 학습 후 연결과 전체 통합 확인 | 실제 DB 연결과 전체 테스트 완료 |
 | 14 | 배포와 실행 문서 | 다른 컴퓨터에서 사용할 수 있는 첫 버전 완성 |
 
 ---
@@ -194,19 +197,19 @@ buildlog/
 
 ### 목표
 
-Supabase PostgreSQL과 SQLite3 테스트에서 함께 사용할 데이터 접근 구조와 사용자 모델을 만듭니다.
+로컬 SQLite3에서 사용할 데이터 접근 구조와 사용자 모델을 만듭니다. Supabase 연결은 이 단계에서 진행하지 않습니다.
 
 ### 작업
 
 1. SQLAlchemy 데이터베이스 연결과 요청별 세션 관리를 만듭니다.
-2. 실행 환경에 따라 `DATABASE_URL` 또는 테스트 DB를 선택하게 합니다.
+2. 개발 실행은 파일 SQLite3, 자동 테스트는 임시 SQLite3 DB를 선택하게 합니다.
 3. Alembic 초기 설정을 만들고 SQLAlchemy 모델 정보를 연결합니다.
 4. 사용자 모델에 이메일, 비밀번호 해시, 닉네임, 운영자 여부와 날짜 정보를 둡니다.
 5. 이메일과 닉네임에 중복 방지 조건을 둡니다.
 6. 비밀번호 원문을 저장하지 않고 안전한 해시만 저장합니다.
 7. 첫 Alembic 변경 파일을 만듭니다.
 8. SQLite3 임시 DB에 테이블을 만들고 사용자 모델 테스트를 실행합니다.
-9. PostgreSQL과 SQLite3에서 다르게 동작하는 전용 기능에 의존하지 않는지 확인합니다.
+9. 나중에 PostgreSQL로 옮길 수 있도록 SQLite3 전용 SQL에 의존하지 않습니다.
 
 ### 확인 방법
 
@@ -219,7 +222,7 @@ Supabase PostgreSQL과 SQLite3 테스트에서 함께 사용할 데이터 접근
 ### 완료 조건
 
 - SQLite3 기반 자동 테스트가 통과합니다.
-- 같은 모델을 Supabase PostgreSQL에 적용할 준비가 되어 있습니다.
+- Supabase 연결 없이 로컬 SQLite3에서 개발을 이어갈 수 있습니다.
 
 ---
 
@@ -478,11 +481,11 @@ React 화면과 FastAPI API를 연결해 회원가입, 로그인, 로그아웃�
 
 ---
 
-## Phase 13. Supabase 연결과 전체 통합 확인
+## Phase 13. Supabase 학습 후 연결과 전체 통합 확인
 
 ### 목표
 
-SQLite3에서 검증한 데이터 구조를 Supabase PostgreSQL에 적용하고 실제 연결에서 전체 기능을 확인합니다.
+관련 수업을 진행한 뒤 SQLite3에서 검증한 데이터 구조를 Supabase PostgreSQL에 적용하고 실제 연결에서 전체 기능을 확인합니다. 학습 전에는 이 Phase를 진행하지 않습니다.
 
 ### 작업
 
@@ -513,7 +516,7 @@ React와 FastAPI를 인터넷에 배포하고 다른 컴퓨터에서도 BuildLog
 ### 작업
 
 1. React와 FastAPI를 운영할 배포 서비스를 비용과 관리 편의성으로 비교합니다.
-2. 배포 환경에 Supabase 연결 정보와 로그인 비밀값을 안전하게 등록합니다.
+2. 배포 환경에 Supabase 연결 정보를 안전하게 등록하고 보안 쿠키 설정을 켭니다.
 3. 운영 React 주소만 FastAPI 호출을 허용합니다.
 4. HTTPS 환경에서 회원가입, 로그인과 로그아웃을 확인합니다.
 5. 다른 컴퓨터와 휴대폰에서 주요 기능을 확인합니다.

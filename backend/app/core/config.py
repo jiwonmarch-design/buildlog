@@ -7,6 +7,10 @@ class Settings(BaseSettings):
     app_name: str = "BuildLog API"
     environment: str = "development"
     frontend_origin: str = "http://localhost:5173"
+    database_url: str = "sqlite+pysqlite:///../database/buildlog.sqlite3"
+    session_cookie_name: str = "buildlog_session"
+    session_lifetime_days: int = 7
+    cookie_secure: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env",
